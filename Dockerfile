@@ -20,7 +20,8 @@ RUN mkdir -p /app/wwwroot/uploads/images /app/wwwroot/uploads/music
 
 COPY --from=build /app/publish .
 
-EXPOSE 80
-EXPOSE 443
+EXPOSE 8080
+
+ENV ASPNETCORE_URLS=http://+:8080
 
 ENTRYPOINT ["dotnet", "AppSorry.dll"]
