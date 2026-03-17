@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -r \"BackgroundMusicDto\\\\|MediaItemDto\" /d/Demo_AppSorry/AppSorry --include=\"*.cs\" ! -path \"*/bin/*\" ! -path \"*/obj/*\" ! -path \"*/Migrations/*\")",
+      "Bash(grep -n \"^public class\" /d/Demo_AppSorry/AppSorry/DTOs/*.cs /d/Demo_AppSorry/AppSorry/Controllers/*.cs)",
+      "Bash(grep -n \"class BackgroundMusicDto\\\\|class MediaItemDto\" /d/Demo_AppSorry/AppSorry/**/*.cs)"
+    ]
+  }
+}

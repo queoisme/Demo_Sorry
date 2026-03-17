@@ -1,16 +1,12 @@
 using AppSorry.Data;
-using AppSorry.DTOs;
 using AppSorry.Models;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using YoutubeExplode;
 using YoutubeExplode.Converter;
 
 namespace AppSorry.Services;
 
-public class MusicService(
-    AppDbContext context,
-    IWebHostEnvironment environment) : IMusicService
+public class MusicService(AppDbContext context) : IMusicService
 {
     private readonly AppDbContext _context = context;
     private readonly string _uploadPath = Path.Combine("wwwroot", "uploads", "music");

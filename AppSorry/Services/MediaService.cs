@@ -1,14 +1,10 @@
 using AppSorry.Data;
-using AppSorry.DTOs;
 using AppSorry.Models;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 
 namespace AppSorry.Services;
 
-public class MediaService(
-    AppDbContext context,
-    IWebHostEnvironment environment) : IMediaService
+public class MediaService(AppDbContext context) : IMediaService
 {
     private readonly AppDbContext _context = context;
     private readonly string _uploadPath = Path.Combine("wwwroot", "uploads", "images");
