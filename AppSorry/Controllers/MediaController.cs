@@ -1,0 +1,95 @@
+using AppSorry.DTOs;
+using AppSorry.Services;
+using Microsoft.AspNetCore.Mvc;
+
+namespace AppSorry.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class MediaController(IMediaService mediaService) : ControllerBase
+{
+    private readonly IMediaService _mediaService = mediaService;
+
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<MediaItemDto>>> GetAllMedia()
+    {
+        var mediaItems = await _mediaService.GetAllMediaAsync();
+        return Ok(mediaItems.Select(m => new MediaItemDto
+        {
+            Id = m.Id,
+            FileName = m.FileName,
+            FileUrl = m.FileUrl,
+            Caption = m.Caption,
+            Emojis = m.Emojis,
+            ContentType = m.ContentType,
+            FileSize = m.FileSize,
+            CreatedAt = m.CreatedAt
+        }));
+    }
+
+    [HttpGet("{id}")]
+    public async Task<ActionResult<MediaItemDto>> GetMedia(int id)
+    {
+        var mediaItem = await _mediaService.GetMediaByIdAsync(id);
+        if (mediaItem == null)
+            return NotFound();
+
+        return Ok(new MediaItemDto
+        {
+            Id = mediaItem.Id,
+            FileName = mediaItem.FileName,
+            FileUrl = mediaItem.FileUrl,
+            Caption = mediaItem.Caption,
+            Emojis = mediaItem.Emojis,
+            ContentType = mediaItem.ContentType,
+            FileSize = mediaItem.FileSize,
+            CreatedAt = mediaItem.CreatedAt
+        });
+    }
+
+    [HttpPost("upload-image")]
+    public async Task<ActionResult<MediaItemDto>> UploadImage([FromForm] IFormFile file, [FromForm] string? caption, [FromForm] string? emojis)
+    {
+        try
+        {
+            var mediaItem = await _mediaService.UploadImageAsync(file, caption, emojis);
+            return CreatedAtAction(nameof(GetMedia), new { id = mediaItem.Id }, new MediaItemDto
+            {
+                Id = mediaItem.Id,
+                FileName = mediaItem.FileName,
+                FileUrl = mediaItem.FileUrl,
+                Caption = mediaItem.Caption,
+                Emojis = mediaItem.Emojis,
+                ContentType = mediaItem.ContentType,
+                FileSize = mediaItem.FileSize,
+                CreatedAt = mediaItem.CreatedAt
+            });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteMedia(int id)
+    {
+        var result = await _mediaService.DeleteMediaAsync(id);
+        if (!result)
+            return NotFound();
+
+        return NoContent();
+    }
+}
+
+public class MediaItemDto
+{
+    public int Id { get; set; }
+    public string FileName { get; set; } = string.Empty;
+    public string FileUrl { get; set; } = string.Empty;
+    public string? Caption { get; set; }
+    public string? Emojis { get; set; }
+    public string ContentType { get; set; } = string.Empty;
+    public long FileSize { get; set; }
+    public DateTime CreatedAt { get; set; }
+}
