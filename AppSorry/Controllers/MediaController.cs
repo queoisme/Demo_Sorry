@@ -48,6 +48,7 @@ public class MediaController(IMediaService mediaService) : ControllerBase
     }
 
     [HttpPost("upload-image")]
+    [Consumes("multipart/form-data")]
     public async Task<ActionResult<MediaItemDto>> UploadImage([FromForm] IFormFile file, [FromForm] string? caption, [FromForm] string? emojis)
     {
         try

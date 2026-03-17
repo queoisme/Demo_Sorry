@@ -50,6 +50,7 @@ public class MusicController(IMusicService musicService) : ControllerBase
     }
 
     [HttpPost("upload-audio")]
+    [Consumes("multipart/form-data")]
     public async Task<ActionResult<BackgroundMusicDto>> UploadAudio([FromForm] IFormFile file, [FromForm] string title)
     {
         try
