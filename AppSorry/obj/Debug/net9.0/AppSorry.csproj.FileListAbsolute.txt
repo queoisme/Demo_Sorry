@@ -128,3 +128,4 @@ D:\Demo_AppSorry\AppSorry\obj\Debug\net9.0\ref\AppSorry.dll
 D:\Demo_AppSorry\AppSorry\bin\Debug\net9.0\AppSorry.staticwebassets.runtime.json
 D:\Demo_AppSorry\AppSorry\bin\Debug\net9.0\Npgsql.dll
 D:\Demo_AppSorry\AppSorry\bin\Debug\net9.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
+D:\Demo_AppSorry\AppSorry\obj\Debug\net9.0\AppSorry.sourcelink.json
