@@ -1,8 +1,6 @@
 using AppSorry.Data;
 using AppSorry.Models;
 using Microsoft.EntityFrameworkCore;
-using YoutubeExplode;
-using YoutubeExplode.Converter;
 
 namespace AppSorry.Services;
 
@@ -60,27 +58,15 @@ public class MusicService(AppDbContext context) : IMusicService
         if (!IsValidYouTubeUrl(youtubeUrl))
             throw new ArgumentException("Invalid YouTube URL format");
 
-        Directory.CreateDirectory(_uploadPath);
+        var title = await GetYouTubeTitleAsync(youtubeUrl);
 
-        var youtube = new YoutubeClient();
-        var video = await youtube.Videos.GetAsync(youtubeUrl);
-        
-        var fileName = $"{Guid.NewGuid()}.mp3";
-        var filePath = Path.Combine(_uploadPath, fileName);
-
-        await youtube.Videos.DownloadAsync(
-            youtubeUrl,
-            new ConversionRequestBuilder(filePath).Build()
-        );
-
-        var fileInfo = new FileInfo(filePath);
         var music = new BackgroundMusic
         {
-            Title = video.Title,
-            FileName = fileName,
-            FileUrl = $"/uploads/music/{fileName}",
-            ContentType = "audio/mpeg",
-            FileSize = fileInfo.Length,
+            Title = title,
+            FileName = string.Empty,
+            FileUrl = youtubeUrl,
+            ContentType = "audio/youtube",
+            FileSize = 0,
             IsFromYoutube = true,
             YoutubeUrl = youtubeUrl,
             CreatedAt = DateTime.UtcNow
@@ -90,6 +76,22 @@ public class MusicService(AppDbContext context) : IMusicService
         await _context.SaveChangesAsync();
 
         return music;
+    }
+
+    private static async Task<string> GetYouTubeTitleAsync(string youtubeUrl)
+    {
+        try
+        {
+            using var http = new HttpClient();
+            http.Timeout = TimeSpan.FromSeconds(10);
+            var oembedUrl = $"https://www.youtube.com/oembed?url={Uri.EscapeDataString(youtubeUrl)}&format=json";
+            var response = await http.GetFromJsonAsync<System.Text.Json.JsonElement>(oembedUrl);
+            return response.GetProperty("title").GetString() ?? "YouTube Music";
+        }
+        catch
+        {
+            return "YouTube Music";
+        }
     }
 
     public async Task<IEnumerable<BackgroundMusic>> GetAllMusicAsync()
