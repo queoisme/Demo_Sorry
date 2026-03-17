@@ -49,11 +49,11 @@ public class MediaController(IMediaService mediaService) : ControllerBase
 
     [HttpPost("upload-image")]
     [Consumes("multipart/form-data")]
-    public async Task<ActionResult<MediaItemDto>> UploadImage([FromForm] IFormFile file, [FromForm] string? caption, [FromForm] string? emojis)
+    public async Task<ActionResult<MediaItemDto>> UploadImage([FromForm] UploadImageRequest request)
     {
         try
         {
-            var mediaItem = await _mediaService.UploadImageAsync(file, caption, emojis);
+            var mediaItem = await _mediaService.UploadImageAsync(request.File, request.Caption, request.Emojis);
             return CreatedAtAction(nameof(GetMedia), new { id = mediaItem.Id }, new MediaItemDto
             {
                 Id = mediaItem.Id,
@@ -81,6 +81,13 @@ public class MediaController(IMediaService mediaService) : ControllerBase
 
         return NoContent();
     }
+}
+
+public class UploadImageRequest
+{
+    public IFormFile File { get; set; } = null!;
+    public string? Caption { get; set; }
+    public string? Emojis { get; set; }
 }
 
 public class MediaItemDto

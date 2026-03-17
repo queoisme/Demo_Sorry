@@ -51,11 +51,11 @@ public class MusicController(IMusicService musicService) : ControllerBase
 
     [HttpPost("upload-audio")]
     [Consumes("multipart/form-data")]
-    public async Task<ActionResult<BackgroundMusicDto>> UploadAudio([FromForm] IFormFile file, [FromForm] string title)
+    public async Task<ActionResult<BackgroundMusicDto>> UploadAudio([FromForm] UploadAudioRequest request)
     {
         try
         {
-            var music = await _musicService.UploadAudioAsync(file, title);
+            var music = await _musicService.UploadAudioAsync(request.File, request.Title);
             return CreatedAtAction(nameof(GetMusic), new { id = music.Id }, new BackgroundMusicDto
             {
                 Id = music.Id,
@@ -112,6 +112,12 @@ public class MusicController(IMusicService musicService) : ControllerBase
 
         return NoContent();
     }
+}
+
+public class UploadAudioRequest
+{
+    public IFormFile File { get; set; } = null!;
+    public string Title { get; set; } = string.Empty;
 }
 
 public class BackgroundMusicDto
