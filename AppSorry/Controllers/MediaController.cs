@@ -13,12 +13,13 @@ public class MediaController(IMediaService mediaService) : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<MediaItemDto>>> GetAllMedia()
     {
+        var baseUrl = $"{Request.Scheme}://{Request.Host}";
         var mediaItems = await _mediaService.GetAllMediaAsync();
         return Ok(mediaItems.Select(m => new MediaItemDto
         {
             Id = m.Id,
             FileName = m.FileName,
-            FileUrl = m.FileUrl,
+            FileUrl = $"{baseUrl}{m.FileUrl}",
             Caption = m.Caption,
             Emojis = m.Emojis,
             ContentType = m.ContentType,
@@ -34,11 +35,12 @@ public class MediaController(IMediaService mediaService) : ControllerBase
         if (mediaItem == null)
             return NotFound();
 
+        var baseUrl = $"{Request.Scheme}://{Request.Host}";
         return Ok(new MediaItemDto
         {
             Id = mediaItem.Id,
             FileName = mediaItem.FileName,
-            FileUrl = mediaItem.FileUrl,
+            FileUrl = $"{baseUrl}{mediaItem.FileUrl}",
             Caption = mediaItem.Caption,
             Emojis = mediaItem.Emojis,
             ContentType = mediaItem.ContentType,
@@ -54,11 +56,12 @@ public class MediaController(IMediaService mediaService) : ControllerBase
         try
         {
             var mediaItem = await _mediaService.UploadImageAsync(request.File, request.Caption, request.Emojis);
+            var baseUrl = $"{Request.Scheme}://{Request.Host}";
             return CreatedAtAction(nameof(GetMedia), new { id = mediaItem.Id }, new MediaItemDto
             {
                 Id = mediaItem.Id,
                 FileName = mediaItem.FileName,
-                FileUrl = mediaItem.FileUrl,
+                FileUrl = $"{baseUrl}{mediaItem.FileUrl}",
                 Caption = mediaItem.Caption,
                 Emojis = mediaItem.Emojis,
                 ContentType = mediaItem.ContentType,

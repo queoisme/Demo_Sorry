@@ -16,6 +16,8 @@ RUN dotnet publish AppSorry.csproj -c Release -o /app/publish
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
 WORKDIR /app
 
+RUN apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*
+
 RUN mkdir -p /app/wwwroot/uploads/images /app/wwwroot/uploads/music
 
 COPY --from=build /app/publish .

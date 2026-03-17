@@ -13,13 +13,14 @@ public class MusicController(IMusicService musicService) : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<BackgroundMusicDto>>> GetAllMusic()
     {
+        var baseUrl = $"{Request.Scheme}://{Request.Host}";
         var musicList = await _musicService.GetAllMusicAsync();
         return Ok(musicList.Select(m => new BackgroundMusicDto
         {
             Id = m.Id,
             Title = m.Title,
             FileName = m.FileName,
-            FileUrl = m.FileUrl,
+            FileUrl = m.IsFromYoutube ? m.FileUrl : $"{baseUrl}{m.FileUrl}",
             ContentType = m.ContentType,
             FileSize = m.FileSize,
             IsFromYoutube = m.IsFromYoutube,
@@ -35,12 +36,13 @@ public class MusicController(IMusicService musicService) : ControllerBase
         if (music == null)
             return NotFound();
 
+        var baseUrl = $"{Request.Scheme}://{Request.Host}";
         return Ok(new BackgroundMusicDto
         {
             Id = music.Id,
             Title = music.Title,
             FileName = music.FileName,
-            FileUrl = music.FileUrl,
+            FileUrl = music.IsFromYoutube ? music.FileUrl : $"{baseUrl}{music.FileUrl}",
             ContentType = music.ContentType,
             FileSize = music.FileSize,
             IsFromYoutube = music.IsFromYoutube,
@@ -56,12 +58,13 @@ public class MusicController(IMusicService musicService) : ControllerBase
         try
         {
             var music = await _musicService.UploadAudioAsync(request.File, request.Title);
+            var baseUrl = $"{Request.Scheme}://{Request.Host}";
             return CreatedAtAction(nameof(GetMusic), new { id = music.Id }, new BackgroundMusicDto
             {
                 Id = music.Id,
                 Title = music.Title,
                 FileName = music.FileName,
-                FileUrl = music.FileUrl,
+                FileUrl = $"{baseUrl}{music.FileUrl}",
                 ContentType = music.ContentType,
                 FileSize = music.FileSize,
                 IsFromYoutube = music.IsFromYoutube,
@@ -84,12 +87,13 @@ public class MusicController(IMusicService musicService) : ControllerBase
             if (music == null)
                 return BadRequest(new { message = "Failed to download YouTube music" });
 
+            var baseUrl = $"{Request.Scheme}://{Request.Host}";
             return CreatedAtAction(nameof(GetMusic), new { id = music.Id }, new BackgroundMusicDto
             {
                 Id = music.Id,
                 Title = music.Title,
                 FileName = music.FileName,
-                FileUrl = music.FileUrl,
+                FileUrl = $"{baseUrl}{music.FileUrl}",
                 ContentType = music.ContentType,
                 FileSize = music.FileSize,
                 IsFromYoutube = music.IsFromYoutube,
@@ -100,6 +104,10 @@ public class MusicController(IMusicService musicService) : ControllerBase
         catch (ArgumentException ex)
         {
             return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = $"Failed to download YouTube music: {ex.Message}" });
         }
     }
 
