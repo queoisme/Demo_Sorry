@@ -1,6 +1,9 @@
+using System.Net;
+using System.Net.Sockets;
 using AppSorry.Data;
 using AppSorry.Services;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +18,9 @@ if (string.IsNullOrEmpty(connectionString))
 {
     throw new InvalidOperationException("Database connection string not found. Please set ConnectionStrings__DefaultConnection environment variable.");
 }
+
+// Railway private networking uses IPv6 which may be unreachable; force IPv4
+connectionString = ForceIPv4Host(connectionString);
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
@@ -50,3 +56,23 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.Run();
+
+static string ForceIPv4Host(string connectionString)
+{
+    try
+    {
+        var csb = new NpgsqlConnectionStringBuilder(connectionString);
+        if (!string.IsNullOrEmpty(csb.Host) && !IPAddress.TryParse(csb.Host, out _))
+        {
+            var addresses = Dns.GetHostAddresses(csb.Host);
+            var ipv4 = Array.Find(addresses, a => a.AddressFamily == AddressFamily.InterNetwork);
+            if (ipv4 != null)
+                csb.Host = ipv4.ToString();
+        }
+        return csb.ConnectionString;
+    }
+    catch
+    {
+        return connectionString;
+    }
+}
